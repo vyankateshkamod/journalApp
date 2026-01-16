@@ -64,4 +64,12 @@ public class UserController {
         return new ResponseEntity<>("Hi" +" "+ authentication.getName() + greeting, HttpStatus.OK);
     }
 
+    // just demostrastion of post request in API integration
+    @PostMapping("/greeting")
+    public ResponseEntity<?> greeting2(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        WeatherResponse weatherResponse = weatherService.postWeather("Mumbai");
+        return new ResponseEntity<>(weatherResponse,HttpStatus.OK);
+    }
+
 }
