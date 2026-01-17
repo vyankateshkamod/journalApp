@@ -1,6 +1,8 @@
 package com.edigest.journalApp.service;
 
 import com.edigest.journalApp.api.response.WeatherResponse;
+import com.edigest.journalApp.cache.AppCache;
+import com.edigest.journalApp.constants.Placeholders;
 import com.edigest.journalApp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,20 +18,23 @@ public class WeatherService {
 
     @Value("${weather.api.key}")
     private String apiKey;
-    private static final String API = "http://api.weatherstack.com/current?access_key=API_KEY&query=CITY";
 
     @Autowired
     RestTemplate restTemplate ;
 
+    @Autowired
+    AppCache appCache ;
+
     public WeatherResponse getWeather(String city){
-        String finalAPI = API.replace("API_KEY",apiKey).replace("CITY",city);
+
+        String finalAPI = appCache.appCache.get(AppCache.keys.WEATHER_API.toString()).replace(Placeholders.API_KEY,apiKey).replace(Placeholders.CITY,city);
         ResponseEntity<WeatherResponse> response = restTemplate.exchange(finalAPI, HttpMethod.GET,null,WeatherResponse.class);
         WeatherResponse body = response.getBody() ;
         return body ;
     }
 
     public WeatherResponse postWeather(String city){
-        String finalAPI = API.replace("API_KEY",apiKey).replace("CITY",city);
+        String finalAPI = appCache.appCache.get(AppCache.keys.WEATHER_API.toString()).replace(Placeholders.API_KEY,apiKey).replace(Placeholders.CITY,city);
 
         User user = User.builder().userName("sham").password("sham").build();
         HttpEntity<User> httpEntity = new HttpEntity<>(user);
