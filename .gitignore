@@ -39,5 +39,5 @@ build/
 .DS_Store
 
 ### Local Spring config (if used) ###
-application.properties
+src/main/resources/application.example.properties
 application.yml
