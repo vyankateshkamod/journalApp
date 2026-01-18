@@ -29,8 +29,8 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build (skip tests)
-        run: mvn -B clean verify -DskipTests
+      - name: Build (compile, skip tests)
+        run: mvn -B clean compile -DskipTests
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
@@ -40,3 +40,4 @@ jobs:
           args: >
             -Dsonar.projectKey=vyankateshkamod_journalApp
             -Dsonar.organization=vyankateshkamod
+            -Dsonar.java.binaries=target/classes
