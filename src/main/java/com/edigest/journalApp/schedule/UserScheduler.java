@@ -4,10 +4,12 @@ import com.edigest.journalApp.cache.AppCache;
 import com.edigest.journalApp.entity.JournalEntry;
 import com.edigest.journalApp.entity.User;
 import com.edigest.journalApp.enums.Sentiment;
+import com.edigest.journalApp.model.SentimentData;
 import com.edigest.journalApp.repository.UserRepositoryImpl;
 import com.edigest.journalApp.service.EmailService;
 import com.edigest.journalApp.service.SentimentAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +35,10 @@ public class UserScheduler {
     @Autowired
     private AppCache appCache ;
 
-    @Scheduled(cron = "0 0 9 * * SUN")
+    @Autowired
+    private KafkaTemplate kafkaTemplate ;
+
+//    @Scheduled(cron = "0 0 9 * * SUN")
 //    @Scheduled(cron = "0 * * ? * *")
     public void fetchUsersAndSendSaMail(){
         List<User> users = userRepository.getUserForSA() ;
@@ -61,11 +66,15 @@ public class UserScheduler {
             }
 
             if(mostFrequentSentiment != null){
-                emailService.sendEmail(
-                        user.getEmail(),
-                        "Sentiment for last 7 days",
-                        mostFrequentSentiment.toString()
-                );
+                SentimentData sentimentData = SentimentData.builder().email(user.getEmail()).sentiment("Sentiment for last 7 days " + mostFrequentSentiment).build();
+
+                kafkaTemplate.send("weekly-sentiments",sentimentData.getEmail(),sentimentData);
+
+//                emailService.sendEmail(
+//                        user.getEmail(),
+//                        "Sentiment for last 7 days",
+//                        mostFrequentSentiment.toString()
+//                );
             }
         }
     }
